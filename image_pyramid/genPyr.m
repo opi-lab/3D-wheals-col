@@ -8,20 +8,24 @@ function [ pyr ] = genPyr( img, type, level )
 
 pyr = cell(1,level);
 pyr{1} = im2double(img);
+
 for p = 2:level
+    % Reduce i-1'th scale
 	pyr{p} = pyr_reduce(pyr{p-1});
-    %pyr{p} = reduce(pyr{p-1});
 end
 if strcmp(type,'gauss'), return; end
 
-for p = level-1:-1:1 % adjust the image size
+% When expanding, we may get image dimensions that
+% aren't quite the same when targetting a particular scale
+% As such, we need to make sure we are consistent
+for p = level-1:-1:1 
 	osz = size(pyr{p+1})*2-1;
 	pyr{p} = pyr{p}(1:osz(1),1:osz(2),:);
 end
 
 for p = 1:level-1
+    % Take i'th scale and subtract with expanded i+1'th scale
 	pyr{p} = pyr{p}-pyr_expand(pyr{p+1});
-    %pyr{p} = pyr{p}-expand(pyr{p+1});
 end
 
 end
