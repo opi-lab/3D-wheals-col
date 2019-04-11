@@ -5,9 +5,10 @@ function [ pyr ] = genPyr( img, type, level )
 %	TYPE can be 'gauss' or 'laplace'.
 %	PYR is a 1*LEVEL cell array.
 % Yan Ke @ THUEE, xjed09@gmail.com
+% Modified by: Jesús Pineda - jesuspinedacastro@outlook.com
 
 pyr = cell(1,level);
-pyr{1} = im2double(img);
+pyr{1} = im2double(img.Z);
 
 for p = 2:level
     % Reduce i-1'th scale
