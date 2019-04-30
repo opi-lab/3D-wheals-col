@@ -22,7 +22,6 @@ clear; clc; close all;
 addpath image_pyramid/
 addpath super_gaussian/
 addpath 3D-P/
-addpath C:\Python27/
 
 %--------------------------------------------------------------------------------------
 % Load data
