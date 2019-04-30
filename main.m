@@ -19,13 +19,14 @@
 clear; clc; close all;
 
 % add to path
-addpath image_pyramid\
-addpath super_gaussian\
-addpath 3D-P\
-addpath C:\Python27\
+addpath image_pyramid/
+addpath super_gaussian/
+addpath 3D-P/
+addpath C:\Python27/
 
+%--------------------------------------------------------------------------------------
 % Load data
-num = '2'; cam = '1';
+num = '4'; cam = '1';
 load(['mat/data'...
     ,num,'_R3D.mat']);
 if strcmp(cam,'2')
@@ -42,9 +43,10 @@ end
 % get ROI
 figure(1),imagesc(S.Z),axis image,axis off,colorbar
 [S.Z, rec] = imcrop;
-X = imcrop(S.X,rec);
-Y = imcrop(S.Y,rec);
+S.X = imcrop(S.X,rec);
+S.Y = imcrop(S.Y,rec);
 
+% --------------------------------------------------------------------------------------
 % Global surface removal
 levels = 7;
 pyr = genPyr(S,'lap',levels); % the Laplacian pyramx
@@ -53,6 +55,22 @@ Sp = gsr(S,pyr,levels,[1 2 7]);
 % Display results
 Mask = nan(size(Sp.Z)); Mask(30:end-70,30:end-30) = 1;
 figure(3),imagesc(Sp.Z.*Mask),axis image off; colorbar
+% Zero padding...
+Spz = Sp.Z.*Mask; Spz(isnan(Spz)) = 0; save('mat/Spz.mat','Spz')
 
+%--------------------------------------------------------------------------------------
 % Wheal detection (Python call!)
+[~,L] = system(['/Users/JesusPineda/anaconda2/bin/python whealdetection.py '...
+    'mat/Spz.mat 50 10 0.22']);
+L = str2num(L); % Locations of the wheals
 
+% Display results
+figure(3),imagesc(Sp.Z.*Mask),axis image off; colorbar, hold on;
+plot(L(:,2),L(:,1),'r*'); hold off;
+
+% Extract patches
+[Spp_w] = extractpatches(Sp,L);
+
+% --------------------------------------------------------------------------------------
+% Super-Gaussian Fitting
+[D,x,xdata] = supergaussianfit(Spp_w);
